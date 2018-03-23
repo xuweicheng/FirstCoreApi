@@ -2,6 +2,7 @@
 using FirstCoreApi.Services;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -10,17 +11,37 @@ namespace FirstCoreApi.Controllers
     [Route("api/cities")]
     public class PoiController : Controller
     {
+        private ILogger<PoiController> _logger;
+
+        public PoiController(ILogger<PoiController> logger)
+        {
+            _logger = logger;
+        }
+
         [HttpGet("{cityId}/poi")]
         public IActionResult GetPois(int cityId)
         {
-            var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
-
-            if (city == null)
+            try
             {
-                return NotFound();
-            }
+                //throw new System.Exception("My Test Exception");
+                var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
 
-            return Ok(city.Pois);
+                if (city == null)
+                {
+                    _logger.LogInformation($"city {cityId} is not found.");
+                    return NotFound();
+                }
+
+                return Ok(city.Pois);
+            }
+            catch (System.Exception ex)
+            {
+                _logger.LogError("exception thrown", ex);
+                //throw exception will generate 500 error, we handle it with a user friendly message. 
+                //not to expose implemtation details
+                //throw; 
+                return StatusCode(500, "There is an error, consumer friendly message.");
+            }
         }
 
         [HttpGet("{cityId}/poi/{id}", Name = "GetPoi")]
