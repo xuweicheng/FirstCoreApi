@@ -181,5 +181,27 @@ namespace FirstCoreApi.Controllers
 
             return NoContent();
         }
+
+        [HttpDelete("{cityId}/poi/{id}")]
+        public IActionResult DeletePoi(int cityId, int id)
+        {
+            var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
+
+            if (city == null)
+            {
+                return NotFound();
+            }
+
+            var poi = city.Pois.FirstOrDefault(p => p.Id == id);
+
+            if (poi == null)
+            {
+                return NotFound();
+            }
+
+            city.Pois.Remove(poi);
+
+            return NoContent();
+        }
     }
 }
