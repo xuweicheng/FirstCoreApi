@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using FirstCoreApi.Models;
 using FirstCoreApi.Services;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;

@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace FirstCoreApi.Controllers
+namespace FirstCoreApi.Models
 {
-    public class PointOfInterestCreateDto
+    public class PointOfInterestUpdateDto
     {
         [Required(ErrorMessage = "Please provide name value")]
         [MaxLength(50)]
