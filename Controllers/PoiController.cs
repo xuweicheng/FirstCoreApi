@@ -51,9 +51,14 @@ namespace FirstCoreApi.Controllers
                 return BadRequest();
             }
 
+            //if(createDto.Name.Equals(createDto.Description))
+            //{
+            //    ModelState.AddModelError("Description", "Name can not be the same with Description");
+            //}
+
             if(!ModelState.IsValid)
             {
-                return BadRequest();
+                return BadRequest(ModelState);
             }
 
             var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
