@@ -22,7 +22,11 @@ namespace FirstCoreApi
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseStatusCodePages();
+
             app.UseMvc();
+
+            app.Run(async (context) => { await context.Response.WriteAsync("No handler found"); });
 
             app.Run((context) =>
             {
