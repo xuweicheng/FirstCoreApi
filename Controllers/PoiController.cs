@@ -22,8 +22,8 @@ namespace FirstCoreApi.Controllers
             return Ok(city.Pois);
         }
 
-        [HttpGet("{cityId}/poi/{poiId}")]
-        public IActionResult getPoi(int cityId, int poiId)
+        [HttpGet("{cityId}/poi/{id}", Name = "GetPoi")]
+        public IActionResult getPoi(int cityId, int id)
         {
             var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
 
@@ -32,7 +32,7 @@ namespace FirstCoreApi.Controllers
                 return NotFound();
             }
 
-            var poi = city.Pois.FirstOrDefault(p => p.Id == poiId);
+            var poi = city.Pois.FirstOrDefault(p => p.Id == id);
 
             if(poi == null)
             {
@@ -40,6 +40,38 @@ namespace FirstCoreApi.Controllers
             }
 
             return Ok(poi);
+        }
+
+        [HttpPost("{cityId}/poi")]
+        public IActionResult CreatePoi(int cityId,
+            [FromBody] PointOfInterestCreateDto createDto)
+        {
+            if(createDto == null)
+            {
+                return BadRequest();
+            }
+
+            var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
+
+            if(city == null)
+            {
+                return NotFound();
+            }
+
+            var maxPoiId = CitiesDataStore.Current.Cities.SelectMany(c => c.Pois).Max(p => p.Id);
+
+            var newPoi = new Models.PointOfInterestDto
+            {
+                Id = ++maxPoiId,
+                Name = createDto.Name,
+                Description = createDto.Description
+            };
+
+            city.Pois.Add(newPoi);
+
+            return CreatedAtRoute("GetPoi", 
+                new { cityId = cityId, id = newPoi.Id }, 
+                newPoi);
         }
     }
 }
