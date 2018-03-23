@@ -1,20 +1,19 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
+﻿using FirstCoreApi.Services;
+using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 
 namespace FirstCoreApi.Controllers
 {
-    [Route("api/cities")]
+    //[Route("api/cities")]
+    [Route("api/[controller]")]
     public class CitiesController : Controller
     {
         //[HttpGet("api/cities")]
         [HttpGet()]
-        public IActionResult getCities()
-        {
-            return new JsonResult(new List<object> {
-                new { id = 1, name ="Dalian" },
-                new { id = 2, name ="Vancouver" },
-            });
-        }
+        public IActionResult GetCities() => new JsonResult(CitiesDataStore.Current.Cities);
 
+        [HttpGet("{id}")]
+        public IActionResult GetCity(int id) => new JsonResult(
+                CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == id));
     }
 }
