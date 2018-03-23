@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Serialization;
+using NLog.Extensions.Logging;
 
 namespace FirstCoreApi
 {
@@ -40,6 +41,7 @@ namespace FirstCoreApi
         {
             logger.AddConsole();
             logger.AddDebug();
+            logger.AddNLog();
 
             if (env.IsDevelopment())
             {
