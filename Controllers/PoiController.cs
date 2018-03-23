@@ -12,10 +12,14 @@ namespace FirstCoreApi.Controllers
     public class PoiController : Controller
     {
         private ILogger<PoiController> _logger;
+        private IMailService _mailService;
 
-        public PoiController(ILogger<PoiController> logger)
+        public PoiController(
+            ILogger<PoiController> logger,
+            IMailService mailService)
         {
             _logger = logger;
+            _mailService = mailService;
         }
 
         [HttpGet("{cityId}/poi")]
@@ -198,6 +202,8 @@ namespace FirstCoreApi.Controllers
 
             poi.Name = updateDto.Name;
             poi.Description = updateDto.Description;
+
+            _mailService.Send("poi updated", "poi updated");
 
 
             return NoContent();
