@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using FirstCoreApi.Services;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -27,14 +28,14 @@ namespace FirstCoreApi.Controllers
         {
             var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
 
-            if(city == null)
+            if (city == null)
             {
                 return NotFound();
             }
 
             var poi = city.Pois.FirstOrDefault(p => p.Id == id);
 
-            if(poi == null)
+            if (poi == null)
             {
                 return NotFound();
             }
@@ -46,24 +47,24 @@ namespace FirstCoreApi.Controllers
         public IActionResult CreatePoi(int cityId,
             [FromBody] PointOfInterestCreateDto createDto)
         {
-            if(createDto == null)
+            if (createDto == null)
             {
                 return BadRequest();
             }
 
-            //if(createDto.Name.Equals(createDto.Description))
-            //{
-            //    ModelState.AddModelError("Description", "Name can not be the same with Description");
-            //}
+            if (createDto.Name.Equals(createDto.Description))
+            {
+                ModelState.AddModelError("Description", "Name can not be the same with Description");
+            }
 
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
             var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
 
-            if(city == null)
+            if (city == null)
             {
                 return NotFound();
             }
@@ -79,9 +80,106 @@ namespace FirstCoreApi.Controllers
 
             city.Pois.Add(newPoi);
 
-            return CreatedAtRoute("GetPoi", 
-                new { cityId = cityId, id = newPoi.Id }, 
+            return CreatedAtRoute("GetPoi",
+                new { cityId = cityId, id = newPoi.Id },
                 newPoi);
+        }
+
+        [HttpPut("{cityId}/poi/{id}")]
+        public IActionResult UpdatePoi(int cityId, int id, [FromBody] PointOfInterestUpdateDto updateDto)
+        {
+            if (updateDto == null)
+            {
+                return BadRequest();
+            }
+
+            if (updateDto.Name.Equals(updateDto.Description))
+            {
+                ModelState.AddModelError("Description", "Name can not be the same with Description");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
+
+            if (city == null)
+            {
+                return NotFound();
+            }
+
+            var poi = city.Pois.FirstOrDefault(p => p.Id == id);
+
+            if (poi == null)
+            {
+                return NotFound();
+            }
+
+            poi.Name = updateDto.Name;
+            poi.Description = updateDto.Description;
+
+            return NoContent();
+        }
+
+        [HttpPatch("{cityId}/poi/{id}")]
+        public IActionResult PartialUpdatePoi(int cityId, int id,
+            [FromBody] JsonPatchDocument<PointOfInterestUpdateDto> patchDocument)
+        {
+            if (patchDocument == null)
+            {
+                return BadRequest();
+            }
+
+            //The ModelState does NOT work for JsonPatchDocument
+            //if (!ModelState.IsValid)
+            //{
+            //    return BadRequest(ModelState); 
+            //}
+
+            var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
+
+            if (city == null)
+            {
+                return NotFound();
+            }
+
+            var poi = city.Pois.FirstOrDefault(p => p.Id == id);
+
+            if (poi == null)
+            {
+                return NotFound();
+            }
+
+            var updateDto = new PointOfInterestUpdateDto()
+            {
+                Name = poi.Name,
+                Description = poi.Description
+            };
+
+
+            //Throws ArgumentNullException if not valid JsonPatchDocument
+            patchDocument.ApplyTo(updateDto, ModelState); //this ApplyTo Only works for JsonPatchDocuemnt<T>
+                                                          //ModelState now contains error of <T> type
+
+            if (updateDto.Name == updateDto.Description)
+            {
+                ModelState.AddModelError("Description", "Name can not be the same with Description");
+            }
+
+            TryValidateModel(updateDto);
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            poi.Name = updateDto.Name;
+            poi.Description = updateDto.Description;
+
+
+            return NoContent();
         }
     }
 }
