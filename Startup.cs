@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Serialization;
 using NLog.Extensions.Logging;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace FirstCoreApi
 {
@@ -48,6 +49,10 @@ namespace FirstCoreApi
             services.AddSingleton<IMailService, CloudMailService>();
 #endif
 
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new Info { Title = "My First Core API", Version = "v1" });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -64,6 +69,13 @@ namespace FirstCoreApi
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c => 
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My First Core API");
+            });
+
 
             app.UseStatusCodePages();
 
